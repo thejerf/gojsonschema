@@ -27,6 +27,7 @@ package gojsonschema
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"reflect"
 	"regexp"
@@ -67,8 +68,73 @@ func (v *subSchema) subValidateWithContext(document interface{}, context *JsonCo
 	return result
 }
 
+// YieldsJSON can be implemented by pure-Go objects loaded via NewGoLoader,
+// allowing these objects to add to the context and to return the JSON
+// objects they represent. This can be done recursively, e.g., a Go object
+// that yields an []interface{} can return YieldsJSON values within the
+// slice.
+//
+// This allows for the creation of validation clients that may be able to
+// create richer error messages as a result.
+//
+// This is only used on the value being validated, not the schema itself.
+//
+// The returned value MUST be of a type yielded by encoding/json;
+// json.Number, string, float64, bool, map[string]object{} or
+// []interface{}, or there will be a panic.
+type YieldsJSON interface {
+	AsJSON() interface{}
+}
+
+// resolveJSON takes a Go object to resolve as a JSON value. If the input
+// implements YieldsJSON, the JSON value is extracted, and the original
+// value is added as the RichContext for the context, Otherwise the
+// original value is returned and the context unchanged.
+func resolveJSON(input interface{}, context *JsonContext) (interface{}, error) {
+	yieldsJSON, isYielder := input.(YieldsJSON)
+	if !isYielder {
+		return input, nil
+	}
+
+	val := yieldsJSON.AsJSON()
+
+	switch v := val.(type) {
+	// a type the rest of this code can handle
+	case bool,
+		string,
+		map[string]interface{},
+		[]interface{},
+		json.Number:
+		context.SetRichContext(input)
+		return v, nil
+
+	// a numeric type the rest of the code can't handle:
+	case uint8, uint16, uint32, uint64,
+		int8, int16, int32, int64,
+		float32, float64,
+		int, uint:
+		context.SetRichContext(input)
+		return json.Number(fmt.Sprintf("%d", v)), nil
+
+	default:
+		return nil, fmt.Errorf("while resolving value of type %T"+
+			" as a JSON value, got invalid type %T returned",
+			input, val)
+	}
+}
+
 // Walker function to validate the json recursively against the subSchema
 func (v *subSchema) validateRecursive(currentSubSchema *subSchema, currentNode interface{}, result *Result, context *JsonContext) {
+	currentNode, err := resolveJSON(currentNode, context)
+	if err != nil {
+		result.addInternalError(
+			new(InvalidJSONError),
+			context,
+			currentNode,
+			ErrorDetails{},
+		)
+		return
+	}
 
 	if internalLogEnabled {
 		internalLog("validateRecursive %s", context.String())

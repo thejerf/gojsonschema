@@ -186,6 +186,9 @@ type (
 
 		// ErrorFormat returns a format string for errors
 		ErrorFormat() string
+
+		// InvalidJSONFormat returns a format string for errors.
+		InvalidJSONFormat() string
 	}
 
 	// DefaultLocale is the default locale for this package
@@ -454,6 +457,10 @@ func (l DefaultLocale) ConditionThen() string {
 // ConditionElse returns a format-string for ConditionElseError errors
 func (l DefaultLocale) ConditionElse() string {
 	return `Must validate "else" as "if" was not valid`
+}
+
+func (l DefaultLocale) InvalidJSONFormat() string {
+	return `invalid json returned`
 }
 
 // constants

@@ -300,6 +300,10 @@ func NewGoLoader(source interface{}) JSONLoader {
 }
 
 func (l *jsonGoLoader) LoadJSON() (interface{}, error) {
+	_, isYieldJSON := l.source.(YieldsJSON)
+	if isYieldJSON {
+		return l.source, nil
+	}
 
 	// convert it to a compliant JSON first to avoid types "mismatches"
 
@@ -309,7 +313,6 @@ func (l *jsonGoLoader) LoadJSON() (interface{}, error) {
 	}
 
 	return decodeJSONUsingNumber(bytes.NewReader(jsonBytes))
-
 }
 
 type jsonIOLoader struct {

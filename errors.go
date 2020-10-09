@@ -207,6 +207,12 @@ type (
 	ConditionElseError struct {
 		ResultErrorFields
 	}
+
+	// InvalidJSONError is produced if a YieldsJSON value returns a
+	// value that can't be treated as valid JSON.
+	InvalidJSONError struct {
+		ResultErrorFields
+	}
 )
 
 // newError takes a ResultError type and sets the type, context, description, details, value, and field
@@ -310,6 +316,9 @@ func newError(err ResultError, context *JsonContext, value interface{}, locale l
 	case *ConditionElseError:
 		t = "condition_else"
 		d = locale.ConditionElse()
+	case *InvalidJSONError:
+		t = "invalid_json"
+		d = locale.InvalidJSONFormat()
 	}
 
 	err.SetType(t)

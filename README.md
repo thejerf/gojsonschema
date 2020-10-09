@@ -1,6 +1,46 @@
-[![GoDoc](https://godoc.org/github.com/xeipuuv/gojsonschema?status.svg)](https://godoc.org/github.com/xeipuuv/gojsonschema)
-[![Build Status](https://travis-ci.org/xeipuuv/gojsonschema.svg)](https://travis-ci.org/xeipuuv/gojsonschema)
-[![Go Report Card](https://goreportcard.com/badge/github.com/xeipuuv/gojsonschema)](https://goreportcard.com/report/github.com/xeipuuv/gojsonschema)
+[![GoDoc](https://godoc.org/github.com/thejerf/gojsonschema?status.svg)](https://godoc.org/github.com/xeipuuv/gojsonschema)
+
+# Fork Information
+
+This is a fork of [gojsonschema](https://github.com/xeipuuv/gojsonschema)
+by thejerf which adds the ability to use NewGoLoader to load a Go object
+that instead of being a Go data structure that directly represents a JSON
+value, is a Go data structure that indirectly implements a JSON value by
+allowing each component bit to recursively) present an implementation of a
+new YieldsJSON interface. You can also add annotations to the context when
+this happens, allowing for much richer handling of validation errors that
+retain more information about where they occurred not just in terms of the
+JSON, but in terms of the objects important to your program.
+
+In other words, instead of being restricted to
+
+    loader := gojsonschema.NewGoLoader(map[string]interface{}{
+        "key": "value",
+        })
+
+you can do things like:
+
+    type SomeRichGoObject struct {
+        // arbitrary fields
+    }
+
+    func (srgo *SomeRichGoObject) AsJSONWithContext(interface{}, interface{}) {
+        return map[string]interface{}{"key": "value"}, srgo
+    }
+
+    // ...
+
+    loader := gojsonschema.NewGoLoader(&SomeRichGoObject{...})
+
+Then, when errors are returned, you can use `.GetRichContext()`
+from the ResultError and retrieve the RichContext object directly, from
+which you can make further intelligent decisions about what to do about
+the error.
+
+I also kept only the badges applicable to this fork up above.
+
+I may submit this back upstream if I have success with it in the project
+I'm doing.
 
 # gojsonschema
 

@@ -48,6 +48,9 @@ type (
 		SetContext(*JsonContext)
 		// Context returns the JSON-context of the error
 		Context() *JsonContext
+		// GetRichContext returns the rich context associated with
+		// the context for this error.
+		GetRichContext() interface{}
 		// SetDescription sets a description for the error
 		SetDescription(string)
 		// Description returns the description of the error
@@ -113,6 +116,11 @@ func (v *ResultErrorFields) SetContext(context *JsonContext) {
 // Context returns the JSON-context of the error
 func (v *ResultErrorFields) Context() *JsonContext {
 	return v.context
+}
+
+// GetRichContext returns the rich context for this error
+func (v *ResultErrorFields) GetRichContext() interface{} {
+	return v.context.GetRichContext()
 }
 
 // SetDescription sets a description for the error

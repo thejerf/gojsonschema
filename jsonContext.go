@@ -28,13 +28,14 @@ import "bytes"
 
 // JsonContext implements a persistent linked-list of strings
 type JsonContext struct {
-	head string
-	tail *JsonContext
+	head        string
+	richContext interface{}
+	tail        *JsonContext
 }
 
 // NewJsonContext creates a new JsonContext
 func NewJsonContext(head string, tail *JsonContext) *JsonContext {
-	return &JsonContext{head, tail}
+	return &JsonContext{head, nil, tail}
 }
 
 // String displays the context in reverse.
@@ -70,4 +71,14 @@ func (c *JsonContext) writeStringToBuffer(buf *bytes.Buffer, del []string) {
 	}
 
 	buf.WriteString(c.head)
+}
+
+// SetRichContext sets the rich context value.
+func (c *JsonContext) SetRichContext(val interface{}) {
+	c.richContext = val
+}
+
+// GetRichContext retrieves the rich context value.
+func (c *JsonContext) GetRichContext() interface{} {
+	return c.richContext
 }
