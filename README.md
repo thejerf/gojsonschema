@@ -1,4 +1,4 @@
-[![GoDoc](https://godoc.org/github.com/thejerf/gojsonschema?status.svg)](https://godoc.org/github.com/xeipuuv/gojsonschema)
+[![GoDoc](https://godoc.org/github.com/thejerf/gojsonschema?status.svg)](https://godoc.org/github.com/thejerf/gojsonschema)
 
 # Fork Information
 
